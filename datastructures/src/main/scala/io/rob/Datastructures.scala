@@ -50,5 +50,13 @@ object Datastructures {
   def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = {
     foldRight(as, Nil:List[B])((a, b) => f(a) ++ b)
   }
+  
+  def filter[A, B](as: List[A])(f: A => Boolean): List[A] = {
+    flatMap(as)(a => if (f(a)) List(a) else Nil)
+  }
+  
+  def zipInts[Int](l1: List[Int], l2: List[Int]): List[Int] = {
+    ???
+  }
 }
 

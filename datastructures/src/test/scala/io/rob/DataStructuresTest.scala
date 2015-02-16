@@ -1,6 +1,7 @@
 package io.rob
 
 import io.rob.Datastructures._
+import org.scalacheck.{Gen, Arbitrary}
 import org.scalacheck.Prop._
 import org.scalatest.prop.Checkers
 import org.scalatest.{Matchers, WordSpec}
@@ -57,6 +58,23 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
     "Homegrown map should behave the same as the standard Scala map" in {
       forAll { (l: List[Int]) =>
         map(l)(_ + 1) == l.map(_ + 1)
+      }.check
+    }
+    
+    "Implement filter using flatMap" in {
+      forAll { (l: List[Int]) =>
+        filter(l)(_ % 2 == 0) == l.filter(_ % 2 == 0)
+      }.check
+    }
+
+    def g[T](implicit a: Arbitrary[T]) = for {
+      v1 <- Arbitrary.arbitrary[List[T]]
+      v2 <- Gen.containerOfN[List,T](v1.length, Arbitrary.arbitrary[T])
+    } yield (v1,v2)
+    
+    "Implement zipIntegers using flatMap" in {
+      forAll(g[Int]) { case (l1, l2) =>
+        zipInts(l1, l2).length == l1.length
       }.check
     }
   }
