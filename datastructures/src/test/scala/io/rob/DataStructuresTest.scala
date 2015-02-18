@@ -72,10 +72,28 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
       v2 <- Gen.containerOfN[List,T](v1.length, Arbitrary.arbitrary[T])
     } yield (v1,v2)
     
-    "Implement zipIntegers using flatMap" in {
+    "Implement zipIntegers" in {
       forAll(g[Int]) { case (l1, l2) =>
         zipInts(l1, l2).length == l1.length
       }.check
     }
+
+    "Implement zipWith" in {
+      forAll(g[Int]) { case (l1, l2) =>
+        zipWith(l1, l2)(_ + _) == zipInts(l1, l2)
+      }.check
+    }
+    
+    "hasSubsequence" in {
+      val l = List(1, 2, 3, 4)
+      val sub1 = List(1, 2)
+      val sub2 = List(2, 3)
+      val sub3 = List(1, 3)
+
+      hasSubsequence(l, sub1) should be (true)
+      hasSubsequence(l, sub2) should be (true)
+      hasSubsequence(l, sub3) should not be (true)
+    }
+
   }
 }

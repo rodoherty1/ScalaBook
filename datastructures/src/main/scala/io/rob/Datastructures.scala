@@ -48,15 +48,39 @@ object Datastructures {
   }
 
   def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = {
-    foldRight(as, Nil:List[B])((a, b) => f(a) ++ b)
+    foldRight(as, Nil: List[B])((a, b) => f(a) ++ b)
   }
-  
+
   def filter[A, B](as: List[A])(f: A => Boolean): List[A] = {
     flatMap(as)(a => if (f(a)) List(a) else Nil)
   }
-  
-  def zipInts[Int](l1: List[Int], l2: List[Int]): List[Int] = {
-    ???
+
+  def zipInts(l1: List[Int], l2: List[Int]): List[Int] = {
+    (l1, l2) match {
+      case (Nil, _) => Nil
+      case (_, Nil) => Nil
+      case (x :: xs, y :: ys) => (x + y) :: zipInts(xs, ys)
+    }
+  }
+
+  def zipWith[A, B](l1: List[A], l2: List[A])(f: (A, A) => B): List[B] = {
+    (l1, l2) match {
+      case (Nil, _) => Nil
+      case (_, Nil) => Nil
+      case (x :: xs, y :: ys) => f(x, y) :: zipWith(xs, ys)(f)
+    }
+  }
+
+  def hasSubsequence[A](l: List[A], sub: List[A]): Boolean = {
+
+    def loop[A](l1: List[A], sub1: List[A]): Boolean = {
+      (l1, sub1) match {
+        case (_, Nil) => true
+        case (Nil, _) => false
+        case (x :: xs, y :: ys) => if (x == y) loop (xs, ys) else loop(xs, sub)
+      }
+    }
+    loop(l, sub)
   }
 }
 
