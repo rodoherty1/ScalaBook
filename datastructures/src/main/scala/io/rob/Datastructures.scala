@@ -77,10 +77,25 @@ object Datastructures {
       (l1, sub1) match {
         case (_, Nil) => true
         case (Nil, _) => false
-        case (x :: xs, y :: ys) => if (x == y) loop (xs, ys) else loop(xs, sub)
+        case (x :: xs, y :: ys) => if (x == y) loop(xs, ys) else loop(xs, sub)
       }
     }
     loop(l, sub)
   }
+
+
+  sealed trait Tree[+A]
+
+  case class Leaf[A]() extends Tree[A]
+
+  case class Branch[A](l: Tree[A], r: Tree[A]) extends Tree[A]
+
+  def treeSize[A](tree: Tree[A]): Int = {
+    tree match {
+      case Leaf() => 1
+      case Branch(l, r) => 1 + treeSize(l) + treeSize(r)
+    }
+  }
+
 }
 

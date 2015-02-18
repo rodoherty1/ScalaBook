@@ -94,6 +94,36 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
       hasSubsequence(l, sub2) should be (true)
       hasSubsequence(l, sub3) should not be (true)
     }
+    
+    lazy val leafs: Gen[Leaf[String]] = Leaf[String]()
+    
+    lazy val branches: Gen[Branch[String]] = for {
+      l <- trees
+      r <- trees
+    } yield Branch(l, r)
+    
+    lazy val trees: Gen[Tree[String]] = for {
+      isLeaf <- Gen.oneOf(true, false)
+      tree <- if (isLeaf) leafs else branches
+    } yield tree
 
+    implicit lazy val treeGenerator: Arbitrary[Tree[String]] = Arbitrary(trees)
+    
+    "Count nodes in a tree" in {
+      forAll(trees) { tree: Tree[String] =>
+        treeSize(tree) > 0
+      }.check
+    }
+    
+    "Count nodes in a given set of trees" in {
+      val t1 = Branch(Leaf(), Leaf())
+      val t2 = Branch(Leaf(), Branch(Leaf(), Leaf()))
+      val t3 = Leaf()
+      val t4 = Branch(Leaf(), Branch(Leaf(), Branch(Leaf(), Leaf())))
+      treeSize(t1) should be (3)
+      treeSize(t2) should be (5)
+      treeSize(t3) should be (1)
+      treeSize(t4) should be (7)
+    }
   }
 }
