@@ -1,8 +1,8 @@
 package io.rob
 
 import io.rob.Datastructures._
-import org.scalacheck.{Gen, Arbitrary}
 import org.scalacheck.Prop._
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.prop.Checkers
 import org.scalatest.{Matchers, WordSpec}
 
@@ -60,7 +60,7 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
         map(l)(_ + 1) == l.map(_ + 1)
       }.check
     }
-    
+
     "Implement filter using flatMap" in {
       forAll { (l: List[Int]) =>
         filter(l)(_ % 2 == 0) == l.filter(_ % 2 == 0)
@@ -69,9 +69,9 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
 
     def g[T](implicit a: Arbitrary[T]) = for {
       v1 <- Arbitrary.arbitrary[List[T]]
-      v2 <- Gen.containerOfN[List,T](v1.length, Arbitrary.arbitrary[T])
-    } yield (v1,v2)
-    
+      v2 <- Gen.containerOfN[List, T](v1.length, Arbitrary.arbitrary[T])
+    } yield (v1, v2)
+
     "Implement zipIntegers" in {
       forAll(g[Int]) { case (l1, l2) =>
         zipInts(l1, l2).length == l1.length
@@ -83,47 +83,81 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
         zipWith(l1, l2)(_ + _) == zipInts(l1, l2)
       }.check
     }
-    
+
     "hasSubsequence" in {
       val l = List(1, 2, 3, 4)
       val sub1 = List(1, 2)
       val sub2 = List(2, 3)
       val sub3 = List(1, 3)
 
-      hasSubsequence(l, sub1) should be (true)
-      hasSubsequence(l, sub2) should be (true)
+      hasSubsequence(l, sub1) should be(true)
+      hasSubsequence(l, sub2) should be(true)
       hasSubsequence(l, sub3) should not be (true)
     }
-    
-    lazy val leafs: Gen[Leaf[String]] = Leaf[String]()
-    
-    lazy val branches: Gen[Branch[String]] = for {
+
+    lazy val leafs: Gen[Leaf[Int]] = for {
+      i <- Arbitrary.arbitrary[Int]
+    } yield Leaf(i)
+
+    lazy val branches: Gen[Branch[Int]] = for {
       l <- trees
       r <- trees
     } yield Branch(l, r)
-    
-    lazy val trees: Gen[Tree[String]] = for {
+
+    lazy val trees: Gen[Tree[Int]] = for {
       isLeaf <- Gen.oneOf(true, false)
       tree <- if (isLeaf) leafs else branches
     } yield tree
 
-    implicit lazy val treeGenerator: Arbitrary[Tree[String]] = Arbitrary(trees)
-    
+    implicit lazy val treeGenerator: Arbitrary[Tree[Int]] = Arbitrary(trees)
+
     "Count nodes in a tree" in {
-      forAll(trees) { tree: Tree[String] =>
+      forAll(trees) { tree: Tree[Int] =>
         treeSize(tree) > 0
       }.check
     }
-    
+
     "Count nodes in a given set of trees" in {
-      val t1 = Branch(Leaf(), Leaf())
-      val t2 = Branch(Leaf(), Branch(Leaf(), Leaf()))
-      val t3 = Leaf()
-      val t4 = Branch(Leaf(), Branch(Leaf(), Branch(Leaf(), Leaf())))
-      treeSize(t1) should be (3)
-      treeSize(t2) should be (5)
-      treeSize(t3) should be (1)
-      treeSize(t4) should be (7)
+      val t1 = Branch(Leaf(1), Leaf(2))
+      val t2 = Branch(Leaf(3), Branch(Leaf(4), Leaf(5)))
+      val t3 = Leaf(6)
+      val t4 = Branch(Leaf(7), Branch(Leaf(8), Branch(Leaf(9), Leaf(10))))
+      treeSize(t1) should be(3)
+      treeSize(t2) should be(5)
+      treeSize(t3) should be(1)
+      treeSize(t4) should be(7)
+    }
+
+
+    "Find max node in a Tree of Int" in {
+      forAll(trees) { tree: Tree[Int] =>
+        val max = maximum(tree)
+        max >= Int.MinValue
+      }.check
+    }
+
+    "Find max node in a Tree for a given set of trees" in {
+      val t1 = Branch(Leaf(1), Leaf(2))
+      val t2 = Branch(Leaf(3), Branch(Leaf(4), Leaf(5)))
+      val t3 = Leaf(6)
+      val t4 = Branch(Leaf(7), Branch(Leaf(8), Branch(Leaf(9), Leaf(10))))
+      maximum(t1) should be(2)
+      maximum(t2) should be(5)
+      maximum(t3) should be(6)
+      maximum(t4) should be(10)
+    }
+
+    "Invoke treeMap on each Tree" in {
+      forAll(trees) {tree: Tree[Int] =>
+        treeMap(tree)(a => s"rob.$a")
+        true
+      }.check
+    }
+
+    "Invoke size, maximum and map using treeFold" in {
+      forAll(trees) { tree: Tree[Int] =>
+        ???
+      }
     }
   }
 }

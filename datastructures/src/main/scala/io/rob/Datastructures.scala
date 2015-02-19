@@ -86,15 +86,34 @@ object Datastructures {
 
   sealed trait Tree[+A]
 
-  case class Leaf[A]() extends Tree[A]
+  case class Leaf[A](value: A) extends Tree[A]
 
   case class Branch[A](l: Tree[A], r: Tree[A]) extends Tree[A]
 
   def treeSize[A](tree: Tree[A]): Int = {
     tree match {
-      case Leaf() => 1
+      case Leaf(_) => 1
       case Branch(l, r) => 1 + treeSize(l) + treeSize(r)
     }
+  }
+  
+  def maximum(tree: Tree[Int]): Int = {
+    tree match {
+      case Leaf(y) => y
+      case Branch(l, r) => maximum(l) max maximum(r)
+    }
+  }
+  
+  def treeMap[A, B](tree: Tree[A])(f: A => B): Tree[B] = {
+    tree match {
+      case Leaf(a) => Leaf(f(a))
+      case Branch(l, r) => Branch(treeMap(l)(f), treeMap(r)(f))
+    }
+  }
+  
+  // See if you can define this function, then reimplement the functions you've already written for `Tree`.
+  def fold[A,B](t: Tree[A])(l: A => B)(b: (B,B) => B): B = {
+    ???
   }
 
 }
