@@ -9,9 +9,9 @@ import org.scalatest.{Matchers, WordSpec}
 /**
  * Created by rob on 08/02/15.
  */
-class DataStructuresTest extends WordSpec with Matchers with Checkers {
+class DataStructures1Test extends WordSpec with Matchers with Checkers {
 
-  "Fun with foldRight" should {
+  "Fun with datastructures" should {
     "Passing Nil and Cons into foldRight should always yield a non-zero lengthWithFoldRight list" in {
       val p = forAll { (l: List[Int]) =>
         l.foldRight(Nil: List[Int])(_ :: _).size == l.size
@@ -95,24 +95,8 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
       hasSubsequence(l, sub3) should not be (true)
     }
 
-    lazy val leafs: Gen[Leaf[Int]] = for {
-      i <- Arbitrary.arbitrary[Int]
-    } yield Leaf(i)
-
-    lazy val branches: Gen[Branch[Int]] = for {
-      l <- trees
-      r <- trees
-    } yield Branch(l, r)
-
-    lazy val trees: Gen[Tree[Int]] = for {
-      isLeaf <- Gen.oneOf(true, false)
-      tree <- if (isLeaf) leafs else branches
-    } yield tree
-
-    implicit lazy val treeGenerator: Arbitrary[Tree[Int]] = Arbitrary(trees)
-
     "Count nodes in a tree" in {
-      forAll(trees) { tree: Tree[Int] =>
+      forAll(TreeGenerators.trees) { tree: Tree[Int] =>
         treeSize(tree) > 0
       }.check
     }
@@ -128,14 +112,6 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
       treeSize(t4) should be(7)
     }
 
-
-    "Find max node in a Tree of Int" in {
-      forAll(trees) { tree: Tree[Int] =>
-        val max = maximum(tree)
-        max >= Int.MinValue
-      }.check
-    }
-
     "Find max node in a Tree for a given set of trees" in {
       val t1 = Branch(Leaf(1), Leaf(2))
       val t2 = Branch(Leaf(3), Branch(Leaf(4), Leaf(5)))
@@ -145,20 +121,6 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
       maximum(t2) should be(5)
       maximum(t3) should be(6)
       maximum(t4) should be(10)
-    }
-
-    "Invoke treeMap on each Tree" in {
-      forAll(trees) {tree: Tree[Int] =>
-        treeMap(tree)(a => s"rob.$a")
-        true
-      }.check
-    }
-
-    "Invoke size, maximum and map using treeFold" in {
-      forAll(trees) { tree: Tree[Int] =>
-        fold(tree)(a => 1)((l, r) => 1 + l + r) == treeSize(tree)
-        fold(tree)(a => a)((l, r) => l max r) == maximum(tree)
-      }
     }
   }
 }
