@@ -111,9 +111,11 @@ object Datastructures {
     }
   }
   
-  // See if you can define this function, then reimplement the functions you've already written for `Tree`.
-  def fold[A,B](t: Tree[A])(l: A => B)(b: (B,B) => B): B = {
-    ???
+  def fold[A,B](t: Tree[A])(f: A => B)(g: (B,B) => B): B = {
+    t match {
+      case Leaf(a) => f(a)
+      case Branch(l, r) => g(fold(l)(f)(g), fold(r)(f)(g))
+    }
   }
 
 }

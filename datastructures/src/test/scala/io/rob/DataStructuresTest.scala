@@ -156,7 +156,8 @@ class DataStructuresTest extends WordSpec with Matchers with Checkers {
 
     "Invoke size, maximum and map using treeFold" in {
       forAll(trees) { tree: Tree[Int] =>
-        ???
+        fold(tree)(a => 1)((l, r) => 1 + l + r) == treeSize(tree)
+        fold(tree)(a => a)((l, r) => l max r) == maximum(tree)
       }
     }
   }
