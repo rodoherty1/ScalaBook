@@ -29,6 +29,23 @@ class LazinessTest extends WordSpec with Matchers {
     "Create fibs via unfold" in {
       unfold((0, 1)) { case ((x1, x2)) => Some((x1, (x2, x1 + x2)))}
     }
+
+    "Map via unfold" in {
+      map(Stream(1, 2, 3, 4))(_ + 1).toList should equal (List(1, 2, 3, 4) map (_ + 1))
+    }
+
+    "Take via Unfold" in {
+      takeWhile(Stream(1, 2, 3, 4))(_ < 3).toList should equal (List(1, 2, 3, 4) takeWhile(_ < 3))
+    }
+
+    "Test1" in {
+      Test1.findDiff(5, List(1, 3, 5, 9, 11)) should equal (7)
+      Test1.findDiff(5, List(1, 5, 7, 9, 11)) should equal (3)
+    }
+
+    "Primes" in {
+      primes().take(5).toList should equal (List(2, 3, 5, 7, 11))
+    }
   }
 
 }
