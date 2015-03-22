@@ -36,11 +36,16 @@ class ListsAndGCDTest extends WordSpec with Matchers {
       formatPrimeFactors(List(2, 2, 2)) should equal (List(2, 3))
       formatPrimeFactors(List(2)) should equal (List(2, 1))
       formatPrimeFactors(List(2, 2, 2, 3)) should equal (List(2, 3, 3, 1))
+      formatPrimeFactors(List(3, 3, 5, 5, 5)) should equal (List(3, 2, 5, 3))
     }
 
     "Go" in {
       go(List("2", "7 2", "2 2 7 1")) should equal ("7 1")
       go(List("4", "2 2 3 2 5 3", "3 2 5 3 11 1", "2 2 3 3 5 4 7 6 19 18", "3 10 5 15")) should equal ("3 2 5 3")
+    }
+
+    "Primes" in {
+      primes.take(7).toList should equal (List(2, 3, 5, 7, 11, 13, 17))
     }
   }
 

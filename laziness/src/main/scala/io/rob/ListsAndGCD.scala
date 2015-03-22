@@ -1,25 +1,52 @@
 package io.rob
 
 import scala.collection.immutable.IndexedSeq
+import scala.collection.parallel.immutable.ParSeq
 import scala.io.Source
 
-/**
- * Created by rob on 13/03/15.
- */
 object ListsAndGCD {
 
-  def evaluateInput(lines: List[String]): Long = {
+  def from(start: BigInt): Stream[BigInt] = start #:: from(start+1)
+
+  val primes: Stream[BigInt] = Stream.cons(BigInt(2), from(BigInt(3)).filter(isPrime))
+
+  def sqrt(number : BigInt): BigInt = {
+    def next(n : BigInt, i : BigInt) : BigInt = (n + i/n) >> 1
+
+    val one = BigInt(1)
+
+    var n = one
+    var n1 = next(n, number)
+
+    while ((n1 - n).abs > one) {
+      n = n1
+      n1 = next(n, number)
+    }
+
+    while (n1 * n1 > number) {
+      n1 -= one
+    }
+
+    n1
+  }
+
+  def isPrime(i: BigInt): Boolean = {
+    val sqrtI = sqrt(i)
+    primes.takeWhile(_ <= sqrtI).forall(i % _ > 0)
+  }
+
+  def evaluateInput(lines: List[String]): BigInt = {
     lines match {
       case Nil => 1
-      case (x :: y :: xs) => Math.pow(x.toInt, y.toInt).toInt * evaluateInput(xs)
+      case (x :: y :: xs) => BigInt(x).pow(y.toInt) * evaluateInput(xs)
       case List(_) => throw new IllegalArgumentException
     }
   }
 
   @annotation.tailrec
-  def gcd(a: Long, b: Long): Long = if (b == 0) a else gcd(b, a % b)
+  def gcd(a: BigInt, b: BigInt): BigInt = if (b.equals(BigInt(0))) a else gcd(b, a % b)
 
-  def gcd(xs: List[Long]): Long = {
+  def gcd(xs: Seq[BigInt]): BigInt = {
     xs.foldLeft(xs)((xs, x) => {
       xs match {
         case Nil => throw new IllegalStateException
@@ -29,60 +56,44 @@ object ListsAndGCD {
     }).head
   }
 
-  def isPrime(n: Long): Boolean = {
-    if (n <= 2) true
-    else {
-      Stream(2, (n/2)-1).forall((n % _) > 0)
-    }
-  }
-
-  def primeFactors(num: Long): List[Long] = {
-    def loop(n: Long, ps: Stream[Long]): List[Long] =
+  def primeFactors(num: BigInt): List[BigInt] = {
+    def loop(n: BigInt, ps: Stream[BigInt]): List[BigInt] =
       if (isPrime(n)) List(n)
-      else if (n % ps.head == 0) ps.head :: loop(n / ps.head, ps)
+      else if (n.mod(ps.head).equals(BigInt(0))) ps.head :: loop(n / ps.head, ps)
       else loop(n, ps.tail)
 
-    loop(num, Laziness.primes())
+    loop(num, primes)
   }
 
-  def formatPrimeFactors(primeFactors: List[Int]) = {
-    // Can I foldRight over my prim factors and reformat List (2, 2, 2, 3) as "2 3 3 1 " (i.e. 2 ^ 3)
-    val input = primeFactors.reverse
-    val result = input.tail.foldRight((input.head, 1, List[Long]()))((a, b) => {
+  def formatPrimeFactors(primeFactors: List[BigInt]) = {
+    val result = primeFactors.foldRight((BigInt(0), BigInt(0), List[BigInt]()))((a, b) => {
       b match {
-        case (h, cnt, acc) => {
-          if (h == a) (a, cnt+1, acc) else (a, 1, h :: cnt :: acc)
-        }
+        case (h, cnt, acc) if BigInt(0).equals(h) => (a, BigInt(1), acc)
+        case (h, cnt, acc) => if (h == a) (a, cnt + 1, acc) else (a, BigInt(1), h :: cnt :: acc)
         case _ => throw new IllegalArgumentException
       }
     })
 
     result match {
-      case (h, count, acc) => {
-        h :: count :: acc
-      }
+      case (h, count, acc) => h :: count :: acc
       case _ => throw new IllegalArgumentException
     }
   }
 
-  def go(lines: List[String]): String = {
-    val count = lines.head.toInt
-    println(s"count: $count")
-    val inputLists: List[List[String]] = lines.tail.map(_.split(" ").toList).toList
+  def go(lines: List[String]): List[BigInt] = {
+    val inputLists: List[List[String]] = lines.tail.map(_.split(" ").toList)
 
-    val input: List[Long] = inputLists.map(evaluateInput)
-    println(s"input: $input")
+    val input: ParSeq[BigInt] = inputLists.par.map(evaluateInput)
 
-    val gcdOfInput = gcd(input)
-    println(s"gcdOfInput: $gcdOfInput")
+    val gcdOfInput = gcd(input.toSeq.toList)
 
     val pf = primeFactors(gcdOfInput).sorted
-    println(s"pf: $pf")
-    formatPrimeFactors(pf).mkString(" ")
+
+    formatPrimeFactors(pf)
   }
 
   def main(args: Array[String]) {
-    go(Source.stdin.getLines().toList)
+    go(Source.stdin.getLines().toList).foreach(l => print(l + " "))
   }
 
 }
