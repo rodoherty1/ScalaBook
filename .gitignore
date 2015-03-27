@@ -4,8 +4,12 @@ bin/
 .settings/
 .idea/
 out/
+.gradle/
+gradle/
 
 *.cache
 *.classpath
 *.project
 *.iml
+gradlew*
+
