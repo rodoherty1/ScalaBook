@@ -6,6 +6,7 @@ bin/
 out/
 .gradle/
 gradle/
+build/ 
 
 *.cache
 *.classpath
